@@ -4,7 +4,6 @@ import argparse
 class AccessDB(object):
 
     def __init__(self):
-        type = 'database'
         url = 'localhost:27017'
         database = 'simulations'
 
@@ -14,6 +13,8 @@ class AccessDB(object):
 
         self.client = MongoClient(url)
         self.db = getattr(self.client, database)
+        self.history = getattr(self.db, 'history')
+
 
     def print_info(self, experiment_id):
         data = self.db.configuration.find(
@@ -23,15 +24,23 @@ class AccessDB(object):
         description = data[0]['description']
         time_created = data[0]['time_created']
         date, time = time_created.split('.')
+
+        # get run duration
+        time_data = self.history.find({'experiment_id': experiment_id}, {'time': 1})
+        time_data = list(time_data)
+        last_emit = time_data[-1]['time']
+
         print(
             'id: {}\n '
             'experiment name: {}\n '
             'time created: {} at {}\n'
+            'simulated run time: {}\n'
             'description: {}\n'.format(
                 experiment_id,
                 name,
                 date[4:6] + '/' + date[6:8] + '/' + date[0:4],
                 time[0:2] + ':' + time[2:4] + ':' + time[4:6],
+                last_emit,
                 description)
         )
 
