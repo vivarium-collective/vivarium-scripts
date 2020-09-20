@@ -1,6 +1,14 @@
 from pymongo import MongoClient
 import argparse
 
+
+def ask_confirm(msg='Are you sure?'):
+    answer = ''
+    while answer not in ('yes', 'no'):
+        answer = input(msg + ' [yes/no] ')
+    return True if answer == 'yes' else False
+
+
 class AccessDB(object):
 
     def __init__(self):
@@ -55,10 +63,11 @@ class AccessDB(object):
                 self.print_info(exp_id)
 
         if self.args.delete:
-            for delete in self.args.delete:
-                query = {'experiment_id': delete}
-                self.db.history.delete_many(query)
-                self.db.configuration.delete_many(query)
+            if ask_confirm('Are you sure you want to delete?'):
+                for delete in self.args.delete:
+                    query = {'experiment_id': delete}
+                    self.db.history.delete_many(query)
+                    self.db.configuration.delete_many(query)
 
         if self.args.view:
             experiment_ids = self.db.configuration.distinct('experiment_id')
