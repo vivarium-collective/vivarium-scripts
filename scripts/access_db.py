@@ -22,14 +22,16 @@ class AccessDB(object):
         name = data[0]['name']
         description = data[0]['description']
         time_created = data[0]['time_created']
+        date, time = time_created.split('.')
         print(
             'id: {}\n '
             'experiment name: {}\n '
-            'time_created: {}\n'
+            'time created: {} at {}\n'
             'description: {}\n'.format(
                 experiment_id,
                 name,
-                time_created,
+                date[4:6] + '/' + date[6:8] + '/' + date[0:4],
+                time[0:2] + ':' + time[2:4] + ':' + time[4:6],
                 description)
         )
 
