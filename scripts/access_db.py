@@ -80,7 +80,7 @@ class AccessDB(object):
             '-d', '--delete',
             nargs='+',
             type=str,
-            default='None',
+            default=False,
             help='provide list of experiment ids to delete')
 
         parser.add_argument(
