@@ -18,16 +18,15 @@ setup(
     license='MIT',
     entry_points={
         'console_scripts': [
-            'scripts.access_db:access'
+            'access_db=scripts.access_db:access'
         ]
     },
-    short_description='',  # TODO: Describe your project briefly.
+    short_description='miscellaneous scripts for vivarium projects',
     long_description=long_description,
     long_description_content_type='text/markdown',
     package_data={},
     include_package_data=True,
     install_requires=[
-        'vivarium-core',
-        # TODO: Add other dependencies.
+        # 'vivarium-core',
     ],
 )
