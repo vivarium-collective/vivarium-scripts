@@ -61,33 +61,32 @@ class AccessDB(object):
                 description)
         )
 
-    def access(self):
+    def list(self, args):
+        experiment_ids = self.db.configuration.distinct('experiment_id')
+        print('experiment ids: {}'.format(experiment_ids))
 
-        if self.args.list:
-            experiment_ids = self.db.configuration.distinct('experiment_id')
-            print('experiment ids: {}'.format(experiment_ids))
-
-        if self.args.all:
+    def info(self, args):
+        if len(self.args.experiment_id) == 0:
             experiment_ids = self.db.configuration.distinct('experiment_id')
             for exp_id in experiment_ids:
                 self.print_info(exp_id)
+        else:
+            for exp_id in self.args.experiment_id:
+                self.print_info(exp_id)
 
-        if self.args.info:
-            if len(self.args.info) == 0:
-                experiment_ids = self.db.configuration.distinct('experiment_id')
-                for exp_id in experiment_ids:
-                    self.print_info(exp_id)
-            else:
-                for exp_id in self.args.info:
-                    self.print_info(exp_id)
+    def delete(self, args):
+        if ask_confirm('Are you sure you want to delete?'):
+            for delete in self.args.experiment_id:
+                query = {'experiment_id': delete}
+                self.db.history.delete_many(query)
+                self.db.configuration.delete_many(query)
 
-        if self.args.delete:
-            if ask_confirm('Are you sure you want to delete?'):
-                for delete in self.args.delete:
-                    query = {'experiment_id': delete}
-                    self.db.history.delete_many(query)
-                    self.db.configuration.delete_many(query)
-
+    def access(self):
+        # Each subcommand parser uses set_defaults to set the `func` arg
+        # to the function that handles that subcommand. Therefore, we
+        # can call the correct subcommand parser by calling
+        # self.args.func.
+        func = self.args.func(self.args)
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -111,32 +110,38 @@ class AccessDB(object):
             help=(
                 'Name of database on local mongoDB instance to read from. '
                 'Defaults to "simulations".'))
-        parser.add_argument(
-            '-d', '--delete',
+
+        subparsers = parser.add_subparsers()
+
+        parser_list = subparsers.add_parser(
+            'list', description='List all experiment IDs in database.')
+        parser_list.set_defaults(func=self.list)
+
+        parser_delete = subparsers.add_parser(
+            'delete', description='Delete experiments from database.')
+        parser_delete.add_argument(
+            'experiment_id',
             nargs='+',
+            default=False,
             type=str,
-            default=False,
-            help='provide list of experiment ids to delete')
-        parser.add_argument(
-            '-l', '--list',
-            action='store_true',
-            default=False,
-            help='List all experiment ids in db')
-        parser.add_argument(
-            '-i', '--info',
+            help='List of experiment IDs to delete.',
+        )
+        parser_delete.set_defaults(func=self.delete)
+
+        parser_info = subparsers.add_parser(
+            'info', description='Get info on a list of experiment IDs.')
+        parser_info.add_argument(
+            'experiment_id',
             nargs='+',
             type=str,
             default=False,
             help=(
                 'Get info on a list of experiment ids. '
                 'if no arguments provided, displays all experiment info'))
-        parser.add_argument(
-            '-a', '--all',
-            action='store_true',
-            default=False,
-            help='view all experiment ids in db')
+        parser_info.set_defaults(func=self.info)
 
         return parser
+
 
 if __name__ == '__main__':
     access = AccessDB()
