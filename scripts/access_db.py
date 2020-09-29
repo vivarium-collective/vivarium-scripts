@@ -8,8 +8,18 @@ Access the experiments saved on mongoDB from the command line:
 >>> python -m scripts.access_db
 """
 
-from pymongo import MongoClient
 import argparse
+import datetime
+import json
+
+from pymongo import MongoClient
+from vivarium.core.emitter import (
+    data_from_database,
+    data_to_database,
+    DatabaseEmitter,
+)
+from vivarium.core.experiment import timestamp
+from vivarium.core.process import serialize_value
 
 
 def ask_confirm(msg='Are you sure?'):
@@ -27,8 +37,12 @@ class AccessDB(object):
         self.args = parser.parse_args()
 
         # mongo client
-        self.client = MongoClient('{}:{}'.format(self.args.host, self.args.port))
-        self.db = getattr(self.client, self.args.database_name)
+        config = {
+            'host': '{}:{}'.format(self.args.host, self.args.port),
+            'database': self.args.database_name
+        }
+        emitter = DatabaseEmitter(config)
+        self.db = emitter.db
 
         # history collection from this db
         self.history = getattr(self.db, 'history')
@@ -80,6 +94,30 @@ class AccessDB(object):
                 query = {'experiment_id': delete}
                 self.db.history.delete_many(query)
                 self.db.configuration.delete_many(query)
+
+    def download(self, args):
+        for experiment_id in args.experiment_id:
+            data, environment_config = data_from_database(
+                experiment_id, self.db)
+            downloaded = {
+                'data': data,
+                'environment_config': environment_config,
+                'experiment_id': experiment_id,
+            }
+            serialized = serialize_value(downloaded)
+            with open('{}.json'.format(experiment_id), 'w') as f:
+                json.dump(serialized, f)
+
+    def upload(self, args):
+        # Initialize database, including with indexes
+        for filepath in args.json_file:
+            with open(filepath, 'r') as f:
+                downloaded = json.load(f)
+            data = downloaded['data']
+            environment_config = downloaded['environment_config']
+            experiment_id = downloaded['experiment_id']
+            data_to_database(data, environment_config, self.db)
+
 
     def access(self):
         # Each subcommand parser uses set_defaults to set the `func` arg
@@ -139,6 +177,30 @@ class AccessDB(object):
                 'Get info on a list of experiment ids. '
                 'if no arguments provided, displays all experiment info'))
         parser_info.set_defaults(func=self.info)
+
+        parser_download = subparsers.add_parser(
+            'download',
+            description='Download experiment data as JSON files',
+        )
+        parser_download.add_argument(
+            'experiment_id',
+            nargs='+',
+            type=str,
+            help='IDs of experiment to download.',
+        )
+        parser_download.set_defaults(func=self.download)
+
+        parser_upload = subparsers.add_parser(
+            'upload',
+            description='Upload experiment data from JSON files.',
+        )
+        parser_upload.add_argument(
+            'json_file',
+            nargs='+',
+            type=str,
+            help='JSON file with experiment data to upload.',
+        )
+        parser_upload.set_defaults(func=self.upload)
 
         return parser
 
