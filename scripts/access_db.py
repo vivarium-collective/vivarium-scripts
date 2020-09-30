@@ -102,7 +102,6 @@ class AccessDB(object):
             downloaded = {
                 'data': data,
                 'environment_config': environment_config,
-                'experiment_id': experiment_id,
             }
             serialized = serialize_value(downloaded)
             with open('{}.json'.format(experiment_id), 'w') as f:
@@ -115,7 +114,6 @@ class AccessDB(object):
                 downloaded = json.load(f)
             data = downloaded['data']
             environment_config = downloaded['environment_config']
-            experiment_id = downloaded['experiment_id']
             data_to_database(data, environment_config, self.db)
 
 
