@@ -29,6 +29,18 @@ def ask_confirm(msg='Are you sure?'):
     return True if answer == 'yes' else False
 
 
+def id_in_db(experiment_id, db):
+        query = {'experiment_id': experiment_id}
+        existing_config = db.configuration.count_documents(
+            query, limit=1
+        )
+        existing_history = db.history.count_documents(
+            query, limit=1
+        )
+        existing = existing_config + existing_history
+        return existing != 0
+
+
 class AccessDB(object):
 
     def __init__(self):
@@ -108,12 +120,18 @@ class AccessDB(object):
                 json.dump(serialized, f)
 
     def upload(self, args):
-        # Initialize database, including with indexes
         for filepath in args.json_file:
             with open(filepath, 'r') as f:
                 downloaded = json.load(f)
             data = downloaded['data']
             environment_config = downloaded['environment_config']
+            experiment_id = environment_config['experiment_id']
+            if id_in_db(experiment_id, self.db):
+                print(
+                    'FAILED: Database contains experiment ID {}'.format(
+                        experiment_id)
+                )
+                return
             data_to_database(data, environment_config, self.db)
 
 
