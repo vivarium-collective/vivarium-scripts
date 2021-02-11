@@ -21,7 +21,7 @@ setup(
             'access_db=scripts.access_db:access'
         ]
     },
-    short_description='miscellaneous scripts for vivarium projects',
+    description='miscellaneous scripts for vivarium projects',
     long_description=long_description,
     long_description_content_type='text/markdown',
     package_data={},
