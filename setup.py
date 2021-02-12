@@ -8,7 +8,7 @@ with open("README.md", 'r') as readme:
 
 setup(
     name='vivarium-scripts',
-    version='0.0.4',
+    version='0.0.5',
     packages=[
         'scripts',
     ],
@@ -21,7 +21,7 @@ setup(
             'access_db=scripts.access_db:access'
         ]
     },
-    short_description='miscellaneous scripts for vivarium projects',
+    description='miscellaneous scripts for vivarium projects',
     long_description=long_description,
     long_description_content_type='text/markdown',
     package_data={},
