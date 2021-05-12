@@ -8,7 +8,7 @@ with open("README.md", 'r') as readme:
 
 setup(
     name='vivarium-scripts',
-    version='0.0.5',
+    version='0.0.6',
     packages=[
         'scripts',
     ],
