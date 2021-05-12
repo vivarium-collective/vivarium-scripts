@@ -74,8 +74,8 @@ class AccessDB(object):
         last_emit = time_data[-1]['time']
 
         print(
-            'id: {}\n '
-            'experiment name: {}\n '
+            'id: {}\n'
+            'experiment name: {}\n'
             'time created: {} at {}\n'
             'simulated run time: {}\n'
             'description: {}\n'.format(
@@ -92,7 +92,7 @@ class AccessDB(object):
         print('experiment ids: {}'.format(experiment_ids))
 
     def info(self, args):
-        if len(self.args.experiment_id) == 0:
+        if 'all' in self.args.experiment_id:
             experiment_ids = self.db.configuration.distinct('experiment_id')
             for exp_id in experiment_ids:
                 self.print_info(exp_id)
@@ -191,7 +191,7 @@ class AccessDB(object):
             default=False,
             help=(
                 'Get info on a list of experiment ids. '
-                'if no arguments provided, displays all experiment info'))
+                'if arguments "all" is provided, displays all experiment info'))
         parser_info.set_defaults(func=self.info)
 
         parser_download = subparsers.add_parser(
