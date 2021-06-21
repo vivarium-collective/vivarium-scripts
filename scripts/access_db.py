@@ -19,7 +19,7 @@ from vivarium.core.emitter import (
     DatabaseEmitter,
 )
 from vivarium.core.engine import timestamp
-from vivarium.core.process import serialize_value
+from vivarium.core.serialize import serialize_value
 
 
 def ask_confirm(msg='Are you sure?'):
