@@ -18,7 +18,7 @@ from vivarium.core.emitter import (
     data_to_database,
     DatabaseEmitter,
 )
-from vivarium.core.experiment import timestamp
+from vivarium.core.engine import timestamp
 from vivarium.core.process import serialize_value
 
 
