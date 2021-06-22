@@ -95,7 +95,8 @@ class AccessDB(object):
         if 'all' in self.args.experiment_id:
             experiment_ids = self.db.configuration.distinct('experiment_id')
             for exp_id in experiment_ids:
-                self.print_info(exp_id)
+                if exp_id:
+                    self.print_info(exp_id)
         else:
             for exp_id in self.args.experiment_id:
                 self.print_info(exp_id)
